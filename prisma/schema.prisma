@@ -1,0 +1,85 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String?  // Optional because BUYERs might not need login initially
+  role      Role
+  isBanned  Boolean @default(false)
+  banReason String?
+  createdAt DateTime @default(now())
+
+  gifterSlots GifterSlot[]
+  orders      Order[]
+}
+
+enum Role {
+  ADMIN
+  GIFTER
+  BUYER
+}
+
+model Skin {
+  id          String   @id @default(cuid())
+  name        String
+  price       Int
+  displayPrice String? // e.g. "2800 PHP"
+  description String?  // e.g. "need 7 days of friendship"
+  imageUrl    String?
+  isActive    Boolean  @default(true)
+  releaseDate DateTime @default(now()) // For upcoming skins
+
+  slots  GifterSlot[]
+  orders Order[]
+}
+
+model GifterSlot {
+  id       String  @id @default(cuid())
+  skinId   String
+  gifterId String
+  isUsed   Boolean @default(false)
+
+  skin   Skin @relation(fields: [skinId], references: [id])
+  gifter User @relation(fields: [gifterId], references: [id])
+}
+
+model Order {
+  id       String  @id @default(cuid())
+  buyerId  String
+  skinId   String
+  gifterId String?
+
+  buyerIGN    String
+  buyerMLID   String
+  buyerServer String
+
+  status     OrderStatus @default(PENDING)
+  followedAt DateTime?
+  readyAt    DateTime?
+  sentAt     DateTime?
+  createdAt  DateTime    @default(now())
+
+  buyer User @relation(fields: [buyerId], references: [id])
+  skin  Skin @relation(fields: [skinId], references: [id])
+}
+
+enum OrderStatus {
+  PENDING
+  ASSIGNED
+  FOLLOWED
+  READY_FOR_GIFTING
+  SENT
+  REFUNDED
+  INVALID
+}
