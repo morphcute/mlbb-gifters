@@ -292,18 +292,20 @@ export async function getAllGifters() {
     });
 }
 
-export async function createSkin(data: { name: string; price: number; imageUrl?: string }) {
+export async function createSkin(data: { name: string; price: number; imageUrl?: string; displayPrice?: string; description?: string }) {
     return prisma.skin.create({
         data: {
             name: data.name,
             price: data.price,
             imageUrl: data.imageUrl,
+            displayPrice: data.displayPrice,
+            description: data.description,
             isActive: true,
         }
     });
 }
 
-export async function updateSkin(id: string, data: { name?: string; price?: number; imageUrl?: string; isActive?: boolean }) {
+export async function updateSkin(id: string, data: { name?: string; price?: number; imageUrl?: string; displayPrice?: string; description?: string; isActive?: boolean }) {
     return prisma.skin.update({
         where: { id },
         data
